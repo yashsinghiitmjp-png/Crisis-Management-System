@@ -41,3 +41,21 @@ config.js
 firebaseConfig.js
 # Vite
 vite.config.js.timestamp-*
+# Firebase
+.firebase/
+.firebaserc
+functions/.env
+functions/.runtimeconfig.json
+
+# Secrets
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+
+# Env template
+!.env.example
+
+# Cache
+.cache/
+.eslintcache

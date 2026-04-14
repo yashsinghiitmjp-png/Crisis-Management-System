@@ -1,0 +1,52 @@
+type User @table {
+  displayName: String!
+  email: String!
+  role: String!
+  createdAt: Timestamp!
+  phoneNumber: String
+  photoUrl: String
+}
+
+type CrisisType @table {
+  name: String!
+  description: String!
+  createdAt: Timestamp!
+}
+
+type Incident @table {
+  title: String!
+  description: String!
+  status: String!
+  priority: String!
+  createdAt: Timestamp!
+  createdBy: User!
+  crisisType: CrisisType
+  location: String
+  resolutionDetails: String
+  resolvedAt: Timestamp
+}
+
+type IncidentUpdate @table {
+  updateText: String!
+  createdAt: Timestamp!
+  updateType: String!
+  incident: Incident!
+  user: User!
+}
+
+type IncidentTeamMember @table(key: ["incident", "user"]) {
+  role: String!
+  assignedAt: Timestamp!
+  incident: Incident!
+  user: User!
+}
+
+type Resource @table {
+  name: String!
+  type: String!
+  status: String!
+  createdAt: Timestamp!
+  description: String
+  location: String
+  contactInfo: String
+}
