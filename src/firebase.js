@@ -1,4 +1,5 @@
 import { initializeApp } from "firebase/app";
+import { getAnalytics, isSupported } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
 import { getDatabase } from "firebase/database";
 import { getAI, GoogleAIBackend } from "firebase/ai";
@@ -17,6 +18,19 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getDatabase(app);
+export let analytics = null;
+
+if (typeof window !== "undefined") {
+  isSupported()
+    .then((supported) => {
+      if (supported) {
+        analytics = getAnalytics(app);
+      }
+    })
+    .catch((error) => {
+      console.warn("Firebase Analytics is unavailable in this environment:", error);
+    });
+}
 
 // Initialize the Gemini Developer API backend service
 export const ai = getAI(app, { backend: new GoogleAIBackend() });
