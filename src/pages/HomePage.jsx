@@ -43,23 +43,57 @@ const HomePage = () => {
     <div className="homepage-wrapper">
 <nav>
   <a href="#" className="nav-logo"><span className="logo-dot"></span> CrisisSync</a>
-  <ul className="nav-links">
-    <li><a href="#about">About</a></li>
-    <li><a href="#how">How It Works</a></li>
-    <li><a href="#status">Status System</a></li>
-    <li><a href="#faq">FAQ</a></li>
-  </ul>
-  <Link to="/signin" className="nav-cta">Launch System →</Link>
+  <Link to="/signin" className="nav-cta btn-emergency-nav">🚨 Emergency</Link>
 </nav>
 
-<section className="hero">
+<section className="hero-split">
   <div className="hero-mesh"></div>
-  <div className="hero-tag"><span className="hero-tag-dot"></span> Google Hackathon 2025 · Firebase Powered</div>
-  <h1>Crisis Response<br/><span className="hero-gradient-text">In Seconds,</span><br/>Not Minutes.</h1>
-  <p className="hero-sub">A real-time emergency coordination platform for hospitality venues. Guests trigger. Staff act. Admins control. All synchronized instantly.</p>
-  <div className="hero-actions">
-    <Link to="/signin" className="btn-primary">Trigger Demo SOS</Link>
-    <a href="#how" className="btn-ghost">See How It Works</a>
+  <div className="hero-left">
+    <div className="trust-badges">
+      <span className="trust-badge">📍 Location auto-detected</span>
+      <span className="trust-badge">⚡ Response &lt; 2s</span>
+      <span className="trust-badge">🔔 Staff notified instantly</span>
+    </div>
+    <h1>Tap. Alert.<br /><span className="hero-solid-text">Help arrives.</span></h1>
+    <p className="hero-sub">2 taps &rarr; Help on the way</p>
+    <div className="hero-actions">
+      <Link to="/signin" className="btn-emergency pulsate-fast">🚨 Trigger Emergency</Link>
+      <a href="#how" className="btn-ghost">Learn How It Works</a>
+    </div>
+  </div>
+  <div className="hero-right">
+    <div className="mini-mockup animate-slide-left">
+      <div className="mock-header">
+        <span className="mock-title">Safety Dashboard</span>
+        <span className="mock-time">🔴 LIVE System</span>
+      </div>
+      <div className="mock-body">
+        <div className="mock-btn fire">
+          <span className="mock-icon">🔥</span>
+          <div className="mock-text">
+            <strong>Fire / Smoke</strong>
+            <p>Evacuation required</p>
+          </div>
+        </div>
+        <div className="mock-btn medical">
+          <span className="mock-icon">➕</span>
+          <div className="mock-text">
+            <strong>Medical</strong>
+            <p>Injury or health crisis</p>
+          </div>
+        </div>
+      </div>
+      <div className="mock-status">
+        <div className="status-label">Real-time status tracking</div>
+        <div className="status-dot-track">
+          <div className="s-dot active-blue"></div>
+          <div className="s-line active-line"></div>
+          <div className="s-dot active-yellow yellow-pulse"></div>
+          <div className="s-line"></div>
+          <div className="s-dot"></div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -141,30 +175,38 @@ const HomePage = () => {
     <div className="section-tag">STATUS SYSTEM</div>
     <h2 style={{'fontSize': 'clamp(2rem, 4vw, 3rem)', 'fontWeight': '800', 'letterSpacing': '-0.03em', 'maxWidth': '560px', 'marginBottom': '12px'}}>Four States. One Clear Picture.</h2>
     <p style={{'color': 'var(--muted)', 'maxWidth': '500px'}}>Every incident, task, and staff member has a live status. Color tells you everything at a glance — no reading required under pressure.</p>
-    <div className="status-showcase">
-      <div className="status-card s-blue">
-        <div className="sc-icon">🔵</div>
-        <div className="sc-label">Starting / Pending</div>
-        <div className="sc-title">Incident Created</div>
-        <div className="sc-desc">SOS triggered. System is processing. Tasks being assigned. Awaiting staff acknowledgement.</div>
+    
+    <div className="status-timeline">
+      <div className="st-node blue">
+        <div className="st-icon">🔵</div>
+        <div className="st-content">
+          <h4>Pending</h4>
+          <p>System processing</p>
+        </div>
       </div>
-      <div className="status-card s-yellow">
-        <div className="sc-icon">🟡</div>
-        <div className="sc-label">In Progress</div>
-        <div className="sc-title">Active Response</div>
-        <div className="sc-desc">Staff acknowledged and is actively responding. Admin monitors live task updates in real-time.</div>
+      <div className="st-line"></div>
+      <div className="st-node yellow">
+        <div className="st-icon">🟡</div>
+        <div className="st-content">
+          <h4>In Progress</h4>
+          <p>Active response</p>
+        </div>
       </div>
-      <div className="status-card s-green">
-        <div className="sc-icon">🟢</div>
-        <div className="sc-label">Completed Successfully</div>
-        <div className="sc-title">Incident Resolved</div>
-        <div className="sc-desc">All tasks done. Admin confirmed resolution. Incident logged with full timestamp trail.</div>
+      <div className="st-line"></div>
+      <div className="st-node green">
+        <div className="st-icon">🟢</div>
+        <div className="st-content">
+          <h4>Resolved</h4>
+          <p>Incident handled</p>
+        </div>
       </div>
-      <div className="status-card s-red">
-        <div className="sc-icon">🔴</div>
-        <div className="sc-label">Incomplete / Failed</div>
-        <div className="sc-title">Escalation Required</div>
-        <div className="sc-desc">Task ignored, timed out, or staff unavailable. Admin escalates — re-alerts all available personnel.</div>
+      <div className="st-line st-line-red"></div>
+      <div className="st-node red">
+        <div className="st-icon">🔴</div>
+        <div className="st-content">
+          <h4>Failed</h4>
+          <p>Escalation needed</p>
+        </div>
       </div>
     </div>
   </div>

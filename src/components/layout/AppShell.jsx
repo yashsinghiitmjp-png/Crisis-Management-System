@@ -26,6 +26,11 @@ const AppShell = ({ children }) => {
     }
   }, [currentUser]);
 
+  // Hide toast on route change
+  useEffect(() => {
+    setShowToast(false);
+  }, [location.pathname]);
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);

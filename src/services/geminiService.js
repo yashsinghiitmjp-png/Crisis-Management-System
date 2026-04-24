@@ -30,7 +30,7 @@ const callGemini = async (prompt) => {
 
 /**
  * Classify an incident's priority using Gemini AI.
- * Returns: { priority: 'critical'|'high'|'medium', reasoning: string }
+ * Returns: { priority: 'critical'|'high'|'medium', reasoning: string, severity: number }
  */
 export const classifyIncidentPriority = async (incidentType, location, description = '') => {
   const prompt = `You are a crisis management AI for a hospitality venue. Classify the priority of this incident.
@@ -43,13 +43,14 @@ Respond ONLY in valid JSON with exactly these fields:
 {
   "priority": "critical" or "high" or "medium",
   "reasoning": "One sentence explaining why this priority level was chosen",
+  "severity": number, // 1 to 10 scale (10 being most severe/dangerous)
   "recommended_actions": ["action 1", "action 2", "action 3"]
 }
 
 Classification rules:
-- Fire, explosion, active shooter, structural collapse → critical
-- Medical emergency, gas leak, severe weather → high
-- Security disturbance, power outage, minor injury → medium`;
+- Fire, explosion, active shooter, structural collapse → critical (severity 8-10)
+- Medical emergency, gas leak, severe weather → high (severity 5-7)
+- Security disturbance, power outage, minor injury → medium (severity 1-4)`;
 
   const result = await callGemini(prompt);
 
@@ -67,9 +68,11 @@ Classification rules:
 
   // Fallback to hardcoded logic
   const fallbackMap = { fire: 'critical', medical: 'high', security: 'medium' };
+  const fallbackSeverity = { fire: 8, medical: 6, security: 4 };
   return {
     priority: fallbackMap[incidentType?.toLowerCase()] || 'medium',
     reasoning: 'Classified using default rules (AI unavailable)',
+    severity: fallbackSeverity[incidentType?.toLowerCase()] || 5,
     recommended_actions: ['Dispatch nearest available staff', 'Notify admin on duty', 'Document incident details'],
   };
 };
@@ -79,7 +82,11 @@ Classification rules:
  * Used when an incident is escalated or flagged red.
  */
 export const generateEMSBrief = async (incident) => {
-  const taskSummary = (incident.tasks || [])
+  const taskArray = Array.isArray(incident.tasks)
+    ? incident.tasks
+    : Object.entries(incident.tasks || {}).map(([id, t]) => ({ id, ...t }));
+
+  const taskSummary = taskArray
     .map((t) => `- Task ${t.id}: ${t.status} (assigned to ${t.staff_id})`)
     .join('\n');
 
@@ -128,9 +135,10 @@ export const getResponseRecommendations = async (incident, availableStaff) => {
     .map((s) => `- ${s.name} (${s.role}, ${s.isAvailable ? 'available' : 'busy'})`)
     .join('\n');
 
-  const prompt = `You are a crisis management AI advisor. Provide response recommendations for this active incident.
+  const prompt = `You are a crisis management AI advisor. Provide specific, tailored response recommendations for this active incident based on the incident details.
 
 Incident: ${incident.type.toUpperCase()} at ${incident.location}
+Details: ${incident.rawMessage || incident.aiSummary || 'Emergency reported.'}
 Priority: ${incident.priority}
 Current Status: ${incident.status}
 Time Elapsed: ${Math.round((Date.now() - new Date(incident.timestamp).getTime()) / 1000)}s

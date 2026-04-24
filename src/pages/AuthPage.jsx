@@ -12,7 +12,21 @@ const redirectByRole = (role) => {
 const AuthPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { signIn, signUp, resetPassword } = useAuth();
+  const { signIn, signUp, resetPassword, provisionDemoUsers } = useAuth();
+  const [provisioning, setProvisioning] = useState(false);
+
+  const handleProvisionDemos = async () => {
+    setProvisioning(true);
+    setError('');
+    setSuccess('');
+    const result = await provisionDemoUsers();
+    if (!result.ok) {
+      setError(`Failed to set up demo accounts: ${result.message}`);
+    } else {
+      setSuccess(`Setup complete! Created: ${result.created}, Existing: ${result.existing}. You can now log in.`);
+    }
+    setProvisioning(false);
+  };
 
   // Decide initial mode based on url
   const initialMode = location.pathname.includes('signup') ? 'register' : 'login';
@@ -226,14 +240,23 @@ const AuthPage = () => {
               </form>
 
               <div className="demo-credentials-card">
-                <div style={{ marginBottom: '0.5rem' }}>
+                <div style={{ marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <h5 style={{ margin: 0 }}>Demo Access (Password: crisis123)</h5>
+                  <button
+                    type="button"
+                    onClick={handleProvisionDemos}
+                    disabled={provisioning}
+                    style={{ fontSize: '0.7rem', padding: '0.2rem 0.5rem', background: 'rgba(59, 130, 246, 0.1)', color: 'var(--color-info)', borderRadius: '4px', border: '1px solid rgba(59, 130, 246, 0.2)', cursor: 'pointer' }}
+                  >
+                    {provisioning ? 'Fixing...' : 'Fix Demo Logins'}
+                  </button>
                 </div>
                 <div className="demo-rows">
                   <div><span>Admin:</span> admin@demo.com</div>
                   <div><span>Staff:</span> staff@demo.com</div>
                   <div><span>Guest:</span> guest@demo.com</div>
                 </div>
+                {success && <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--color-success)' }}>{success}</div>}
               </div>
             </div>
           ) : mode === 'forgot-password' ? (
