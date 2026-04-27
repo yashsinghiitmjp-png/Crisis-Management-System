@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { ArrowRight, UserCheck, ShieldClose, ShieldCheck, Mail, Lock, User, Briefcase, ChevronLeft } from 'lucide-react';
+import { ArrowRight, ShieldClose, ShieldCheck, Mail, Lock, User, ChevronLeft } from 'lucide-react';
 
 const redirectByRole = (role) => {
   if (role === 'admin') return '/admin';
@@ -12,21 +12,8 @@ const redirectByRole = (role) => {
 const AuthPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { signIn, signUp, resetPassword, provisionDemoUsers } = useAuth();
-  const [provisioning, setProvisioning] = useState(false);
-
-  const handleProvisionDemos = async () => {
-    setProvisioning(true);
-    setError('');
-    setSuccess('');
-    const result = await provisionDemoUsers();
-    if (!result.ok) {
-      setError(`Failed to set up demo accounts: ${result.message}`);
-    } else {
-      setSuccess(`Setup complete! Created: ${result.created}, Existing: ${result.existing}. You can now log in.`);
-    }
-    setProvisioning(false);
-  };
+  const { signIn, signUp, resetPassword } = useAuth();
+  const hasSignupState = location.state?.hasSignedUp === true;
 
   // Decide initial mode based on url
   const initialMode = location.pathname.includes('signup') ? 'register' : 'login';
@@ -38,8 +25,6 @@ const AuthPage = () => {
     name: '',
     email: '',
     password: '',
-    role: 'guest',
-    staffId: 's1',
   });
 
   const [error, setError] = useState('');
@@ -51,24 +36,8 @@ const AuthPage = () => {
   });
   const [verifyCode, setVerifyCode] = useState(['', '', '', '', '', '']);
 
-  // Sync mode state when location changes (if navigating directly)
-  useEffect(() => {
-    const newMode = location.pathname.includes('signup') ? 'register' : 'login';
-
-    // Auto-redirect to login if they already signed up and try to hit /signup
-    if (newMode === 'register' && (hasSignedUp || location.state?.hasSignedUp)) {
-      handleToggleMode('login', { hasSignedUp: true });
-      return;
-    }
-
-    setMode(newMode);
-    setStep('details');
-    setError('');
-    setSuccess('');
-  }, [location.pathname, hasSignedUp]);
-
   // Push new path to history if user toggles view, preventing black screen back-nav issues
-  const handleToggleMode = (newMode, navigationState = {}) => {
+  const handleToggleMode = useCallback((newMode, navigationState = {}) => {
     setMode(newMode);
     setStep('details');
     setError('');
@@ -78,7 +47,22 @@ const AuthPage = () => {
       state: navigationState,
       replace: true
     });
-  };
+  }, [navigate]);
+
+  // Sync mode state when location changes (if navigating directly)
+  useEffect(() => {
+    const newMode = location.pathname.includes('signup') ? 'register' : 'login';
+
+    if (newMode === 'register' && (hasSignedUp || hasSignupState)) {
+      handleToggleMode('login', { hasSignedUp: true });
+      return;
+    }
+
+    setMode(newMode);
+    setStep('details');
+    setError('');
+    setSuccess('');
+  }, [handleToggleMode, hasSignedUp, hasSignupState, location.pathname]);
 
   const handleLoginSubmit = async (event) => {
     event.preventDefault();
@@ -120,6 +104,20 @@ const AuthPage = () => {
     // Switch to Sign In screen immediately with no waiting period
     navigate('/signin', { state: { hasSignedUp: true }, replace: true });
     setForm(prev => ({ ...prev, password: '' })); // Clear password for security
+  };
+
+  const handleResetSubmit = async (event) => {
+    event.preventDefault();
+    setError('');
+    setSuccess('');
+
+    const result = await resetPassword(form.email);
+    if (!result.ok) {
+      setError(result.message);
+      return;
+    }
+
+    setSuccess(result.message);
   };
 
 
@@ -167,7 +165,7 @@ const AuthPage = () => {
         </div>
 
         {/* Toggle between Sign In / Sign Up - Hidden if user just signed up or resetting password */}
-        {step === 'details' && mode !== 'forgot-password' && !hasSignedUp && !location.state?.hasSignedUp && (
+        {step === 'details' && mode !== 'forgot-password' && !hasSignedUp && !hasSignupState && (
           <div className="auth-toggle-group">
             <button
               className={`auth-toggle-btn ${mode === 'login' ? 'active' : ''}`}
@@ -192,7 +190,7 @@ const AuthPage = () => {
                 <p>Sign in to access your crisis management dashboard.</p>
               </div>
 
-              {(location.state?.hasSignedUp || hasSignedUp) && (
+              {(hasSignupState || hasSignedUp) && (
                 <div className="auth-success-msg">
                   <ShieldCheck size={18} />
                   <span>Account created successfully!</span>
@@ -238,26 +236,6 @@ const AuthPage = () => {
                   Sign In <ArrowRight size={18} />
                 </button>
               </form>
-
-              <div className="demo-credentials-card">
-                <div style={{ marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <h5 style={{ margin: 0 }}>Demo Access (Password: crisis123)</h5>
-                  <button
-                    type="button"
-                    onClick={handleProvisionDemos}
-                    disabled={provisioning}
-                    style={{ fontSize: '0.7rem', padding: '0.2rem 0.5rem', background: 'rgba(59, 130, 246, 0.1)', color: 'var(--color-info)', borderRadius: '4px', border: '1px solid rgba(59, 130, 246, 0.2)', cursor: 'pointer' }}
-                  >
-                    {provisioning ? 'Fixing...' : 'Fix Demo Logins'}
-                  </button>
-                </div>
-                <div className="demo-rows">
-                  <div><span>Admin:</span> admin@demo.com</div>
-                  <div><span>Staff:</span> staff@demo.com</div>
-                  <div><span>Guest:</span> guest@demo.com</div>
-                </div>
-                {success && <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--color-success)' }}>{success}</div>}
-              </div>
             </div>
           ) : mode === 'forgot-password' ? (
             <div className="auth-view animate-fade-in">

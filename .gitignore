@@ -6,9 +6,14 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+firebase-debug.log
+firestore-debug.log
+database-debug.log
+ui-debug.log
 
 # Node modules
 node_modules/
+functions/node_modules/
 
 # Production build output
 dist/
@@ -28,33 +33,27 @@ dist-ssr/
 *.sln
 *.sw?
 
-# Environment Variables
+# Environment Variables & Secrets
 .env
-.env.production
-.env.development
-.env.test
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example
 config.js
 firebaseConfig.js
-# Vite
-vite.config.js.timestamp-*
+
 # Firebase
 .firebase/
-.firebaserc
 functions/.env
-functions/.runtimeconfig.json
+functions/.secret.*
+*-debug.log
 
-# Secrets
+# Secrets (allow whitelist)
 *.json
 !package.json
 !package-lock.json
 !tsconfig.json
-
-# Env template
-!.env.example
+!firebase.json
+!database.rules.json
+!.firebaserc
 
 # Cache
 .cache/

@@ -50,7 +50,14 @@ VITE_FIREBASE_DATABASE_URL=your_db_url
 VITE_FIREBASE_STORAGE_BUCKET=your_bucket
 VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 VITE_FIREBASE_APP_ID=your_app_id
-VITE_GEMINI_API_KEY=your_google_ai_key
+VITE_FIREBASE_FUNCTIONS_REGION=us-central1
+VITE_GEMINI_API_KEY=your_gemini_key
+```
+
+Set the Gemini secret on the backend instead of shipping it to the browser:
+
+```bash
+firebase functions:secrets:set GEMINI_API_KEY
 ```
 
 ### 2. Local Launch
@@ -70,7 +77,7 @@ npm run dev
 > **Credential & System Access Policy**
 > To maintain the integrity of the crisis network, access to internal systems is strictly controlled:
 > 
-> 1.  **Restricted API Keys**: API keys for Firebase and Gemini AI are **never** bundled in static files. Access to these keys and the internal services they power is granted **only** after an account has been verified and assigned a specific role (Admin/Staff).
+> 1.  **Restricted API Keys**: Firebase config is public-client safe, while the Gemini key is stored in Firebase Functions secrets and used only from backend callable functions.
 > 2.  **Role-Based Access Control (RBAC)**: The Command Center and Resource Deployment panels are unreachable without an authenticated Admin session.
 > 3.  **Encrypted Environment**: All sensitive configuration is handled via server-side environment variables or secure local `.env` files which are excluded from version control.
 > 4.  **Verification Flow**: New registrations require a 6-digit verification code to ensure identity validation before portal access is provisional.
@@ -86,12 +93,19 @@ npm run dev
 
 ---
 
-## 🧪 Demo Access
-| Role | Email | Password |
-| :--- | :--- | :--- |
-| **Admin** | `admin@demo.com` | `crisis123` |
-| **Staff** | `staff@demo.com` | `crisis123` |
-| **Guest** | `guest@demo.com` | `crisis123` |
+## 🚀 Deployment Notes
+
+```bash
+npm ci
+npm run build
+firebase use <your-project-id>
+firebase deploy
+```
+
+- Hosting serves the built Vite app from `dist/`.
+- Realtime Database rules are in `database.rules.json`.
+- Firebase Functions source is in `functions/`.
+- `functions/` requires its own `npm install` before local emulator or deploy verification.
 
 ---
 *Developed for the Google Hackathon 2024. Empowering the frontlines of emergency response.*

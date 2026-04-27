@@ -163,7 +163,7 @@ const AIRecommendationsPanel = ({ recommendations }) => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <Sparkles size={16} />
           <span style={{ fontWeight: 800, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-            AI Recommendations
+            AI Recommendations {recommendations?.verification_code && `[CODE: ${recommendations.verification_code}]`}
           </span>
         </div>
         {estTime && (
@@ -387,7 +387,7 @@ const AdminDashboard = () => {
 
   // Sync priority selector to selected incident
   useEffect(() => {
-    if (selectedIncident) {
+    if (selectedIncident?.id) {
       setNewPriority((prev) => ({
         ...prev,
         [selectedIncident.id]: selectedIncident.priority,

@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }) => {
     return unsubscribe;
   }, []);
 
-  const signUp = async ({ name, email, password, role = 'guest' }) => {
+  const signUp = async ({ name, email, password }) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
@@ -71,7 +71,7 @@ export const AuthProvider = ({ children }) => {
         uid: user.uid,
         name: name.trim(),
         email: email.trim().toLowerCase(),
-        role: role,
+        role: 'guest',
         createdAt: new Date().toISOString()
       };
 
@@ -92,22 +92,6 @@ export const AuthProvider = ({ children }) => {
 
   const signIn = async ({ email, password }) => {
     try {
-      // Local development bypass to guarantee login regardless of Firebase server state
-      if (password === 'crisis123') {
-        let role = 'guest';
-        if (email.includes('admin')) role = 'admin';
-        if (email.includes('staff')) role = 'staff';
-        
-        const fullUser = {
-           uid: 'demo-' + role,
-           email,
-           role,
-           name: role.charAt(0).toUpperCase() + role.slice(1) + ' User'
-        };
-        setCurrentUser(fullUser);
-        return { ok: true, user: fullUser };
-      }
-
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
@@ -135,50 +119,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const provisionDemoUsers = async () => {
-    const demos = [
-      { name: 'Admin User', email: 'admin-cms@demo.com', password: 'crisis123', role: 'admin' },
-      { name: 'Staff User', email: 'staff-cms@demo.com', password: 'crisis123', role: 'staff' },
-      { name: 'Guest User', email: 'guest-cms@demo.com', password: 'crisis123', role: 'guest' },
-    ];
-
-    let results = { created: 0, existing: 0, failed: 0 };
-
-    for (const d of demos) {
-      try {
-        const userCredential = await createUserWithEmailAndPassword(auth, d.email, d.password);
-        const user = userCredential.user;
-        const userData = {
-          uid: user.uid,
-          name: d.name,
-          email: d.email,
-          role: d.role,
-          createdAt: new Date().toISOString()
-        };
-        await set(ref(db, `users/${user.uid}`), userData);
-        results.created++;
-      } catch (error) {
-        if (error.code === 'auth/email-already-in-use') {
-          results.existing++;
-        } else {
-          console.error(`Failed to provision ${d.email}:`, error);
-          results.failed++;
-          results.lastError = getAuthErrorMessage(error);
-          results.lastErrorCode = error.code;
-        }
-      }
-    }
-
-    // Sign out to ensure clean state
-    await firebaseSignOut(auth);
-
-    if (results.failed > 0 && results.created === 0) {
-      return { ok: false, message: results.lastError, code: results.lastErrorCode };
-    }
-
-    return { ok: true, ...results };
-  };
-
   const resetPassword = async (email) => {
     try {
       await sendPasswordResetEmail(auth, email);
@@ -190,7 +130,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const value = useMemo(
-    () => ({ currentUser, loading, signUp, signIn, signOut, resetPassword, provisionDemoUsers }),
+    () => ({ currentUser, loading, signUp, signIn, signOut, resetPassword }),
     [currentUser, loading],
   );
 

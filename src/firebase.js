@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAnalytics, isSupported } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
 import { getDatabase } from "firebase/database";
-import { getAI, GoogleAIBackend } from "firebase/ai";
+import { connectFunctionsEmulator, getFunctions } from "firebase/functions";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -18,6 +18,23 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getDatabase(app);
+export const functions = getFunctions(
+  app,
+  import.meta.env.VITE_FIREBASE_FUNCTIONS_REGION || "us-central1"
+);
+
+const useFunctionsEmulator =
+  import.meta.env.DEV &&
+  import.meta.env.VITE_USE_FIREBASE_FUNCTIONS_EMULATOR === "true";
+
+if (useFunctionsEmulator) {
+  connectFunctionsEmulator(
+    functions,
+    import.meta.env.VITE_FIREBASE_FUNCTIONS_EMULATOR_HOST || "127.0.0.1",
+    Number(import.meta.env.VITE_FIREBASE_FUNCTIONS_EMULATOR_PORT || 5001)
+  );
+}
+
 export let analytics = null;
 
 if (typeof window !== "undefined") {
@@ -32,6 +49,4 @@ if (typeof window !== "undefined") {
     });
 }
 
-// Initialize the Gemini Developer API backend service
-export const ai = getAI(app, { backend: new GoogleAIBackend() });
 export default app;

@@ -1,0 +1,12 @@
+{
+  "name": "crisis-management-functions",
+  "private": true,
+  "main": "index.js",
+  "engines": {
+    "node": "20"
+  },
+  "dependencies": {
+    "@google/genai": "^1.50.1",
+    "firebase-functions": "^5.1.1"
+  }
+}

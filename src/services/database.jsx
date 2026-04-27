@@ -161,14 +161,7 @@ export const DatabaseProvider = ({ children }) => {
       if (data) {
         setStaff(Object.values(data));
       } else {
-        // Seed default staff on first run
-        const defaultStaff = [
-          { id: 's1', name: 'John (Medical)', role: 'medical', isAvailable: true },
-          { id: 's2', name: 'Sarah (Security)', role: 'security', isAvailable: true },
-          { id: 's3', name: 'Mike (Fire)', role: 'fire', isAvailable: true },
-          { id: 's4', name: 'Emma (Medical)', role: 'medical', isAvailable: false },
-        ];
-        defaultStaff.forEach((s) => set(ref(db, `staff/${s.id}`), s));
+        setStaff([]);
       }
       setLoading(false);
       clearTimeout(syncTimeout);
@@ -719,6 +712,7 @@ export const DatabaseProvider = ({ children }) => {
         { id: incidentId, ...incident },
         staff
       );
+      console.log('[CMS:AI] Received recommendations:', recommendations);
       const severity = resolveIncidentSeverity({ ...incident, aiRecommendations: recommendations });
       const payload = {
         ...recommendations,
